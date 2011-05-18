@@ -1,0 +1,37 @@
+UPDATE:
+=======
+1.0beta1 to 1.0beta2:
+=====================
+1 - add a new attribute to the "User" content class:
+        Type="YubiKey OTP"
+        Name="Backup YubiKey OTP"
+        Identifier="yubikey_backup"
+        Not required, Not searchable, Not collection
+2 - extract the archive in your extension/ folder
+
+
+1st TIME INSTALLATION:
+======================
+1 - edit your "User" content class
+2 - add a new attribute to the "User" content class:
+        Type="YubiKey OTP"
+        Name="YubiKey OTP (once set, you CANNOT login without your YubiKey!)"
+        Identifier="yubikey"
+        Not required, Not searchable, Not collection
+
+3 - add a new attribute to the "User" content class:
+        Type="YubiKey OTP"
+        Name="Backup YubiKey OTP"
+        Identifier="yubikey_backup"
+        Not required, Not searchable, Not collection
+
+4 - add a new attribute to the "User" content class:
+        Type="Checkbox"
+        Name="Use my YubiKey OTP for multi-factor. You will need both password and YubiKey to sign in"
+        Identifier="multifactor"
+        Not required, Not searchable, Not collection
+
+5 - extract the archive in your extension/ folder
+6 - activate the extension in your site.ini.append.php. Make sure that qhyubikey extension is activated before ezwebin/ezflow extension.
+7 - regenerate autoload and clear ini and template caches.
+8 - edit your user information and use your YubiKey to generate a OTP string to be recorded. 

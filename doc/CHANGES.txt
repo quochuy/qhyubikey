@@ -1,0 +1,3 @@
+- secondary YubiKey support
+- bug fixes
+- debug output settings
