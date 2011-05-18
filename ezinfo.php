@@ -25,7 +25,7 @@ class YubiKeyOTPInfo
     {
         return array(
             'Name' => "YubiKey OTP eZ Publish Integration",
-            'Version' => "1.0beta2",
+            'Version' => "1.0",
             'Author' => "<a href='http://www.qhphotography.com/'>Quoc-Huy</a>",
             'Copyright' => "Copyright (C) 2008 Quoc-Huy NGUYEN DINH",
             'License' => "GNU General Public License v2.0",

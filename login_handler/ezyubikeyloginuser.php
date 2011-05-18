@@ -13,27 +13,37 @@ class eZYubiKeyLoginUser extends eZUser
     */
     static function loginUser( $login, $password, $authenticationMatch = false )
     {
+	$ini = eZINI::instance( 'qhyubikey.ini' );
+	$debugOutput = $ini->variable( 'QHYubiKeySettings', 'DebugOutput' );
 	$YubiKey = $password;
-	eZLog::write("Login handler, YubiKey: {$YubiKey}");
+	if( $debugOutput ) eZLog::write("Login handler, YubiKey: {$YubiKey}");
 
 	$user = eZUser::fetchByName( $login );
 	$userContentObject = eZContentObject :: fetch( $user->attribute('contentobject_id') );
         $userDatamap = $userContentObject->dataMap();
-        $userRecordedYubiKeyOTP = $userDatamap['yubikey']->attribute('data_text');
-	$userRecordedYubiKeyOTP_2 = $userDatamap['yubikey_backup']->attribute('data_text');
+
+	$matrix = new eZMatrix( '' );
+	$matrix->decodeXML( $userDatamap['yubikeys']->attribute('data_text'));
+	$userRecordedYubiKeyOTPArray = $matrix->Matrix['columns']['sequential'][1]['rows'];
+
 	$userUseOTP4MultiFactor = $userDatamap['multifactor']->attribute('data_int');
 
         $YubiKeyPrefix = substr($YubiKey, 0, 12);
-	$recordedYubiKeyPrefix = substr($userRecordedYubiKeyOTP, 0, 12);
-	$recordedYubiKeyPrefix_2 = substr($userRecordedYubiKeyOTP_2, 0, 12); 
-	
-	eZLog::write("Primary Key: {$userRecordedYubiKeyOTP}");
-	eZLog::write("Secondary Key: {$userRecordedYubiKeyOTP_2}");
+
+	$recordedMatchedPrefixes = array();
+	foreach( $userRecordedYubiKeyOTPArray as $key => $userRecordedYubiKeyOTP ) {
+		if( $debugOutput ) eZLog::write( "Yubikey{$key}: {$userRecordedYubiKeyOTP}");
+		$recordedYubiKeyPrefix = substr( $userRecordedYubiKeyOTP, 0, 12 );
+		if( $YubiKeyPrefix == $recordedYubiKeyPrefix) {
+			if( $debugOutput ) eZLog::write( "key {$key}'s prefix matches" );
+			$recordedMatchedPrefixes[] = $key; 
+		}
+	}
 	
 	switch(true) {
 		// if the use's set to use OTP as multifactor
 		case ($userUseOTP4MultiFactor == 1):
-			eZLog::write("Multifactor: {$userUseOTP4MultiFactor}");
+			if( $debugOutput ) eZLog::write("Multifactor: {$userUseOTP4MultiFactor}");
 			// if no key was submitted then don't allow login
 			if(empty($YubiKey)) $user = self::REQUIRE_MULTIFACTOR;
 			// else return false to continue with the next login handler
@@ -41,33 +51,26 @@ class eZYubiKeyLoginUser extends eZUser
 		break;
 
 		// if there is an OTP recorded and not set to multifactor but no YubiKey submitted then don't allow login
-		case (!empty($userRecordedYubiKeyOTP) && empty($YubiKey)):
-			eZLog::write("OTP set, no multifactor, no YubiKey received");
+		case (count($userRecordedYubiKeyOTPArray) && empty($YubiKey)):
+			if( $debugOutput ) eZLog::write("OTP set, no multifactor, no YubiKey received");
 			$user = self::REQUIRE_YUBIKEY_OTP;
 		break;
 
 		/*
         	Don't allow login in using YubiKey if
                 	- if YubiKey is empty
+			- if there are no matching recorded keys in the profile
                 	- if no YubiKey OTP has been recorded in profile
         	*/
 		case (empty($YubiKey)):
-		case (empty($userRecordedYubiKeyOTP)):
-			eZLog::write("Auth denied");
+		case (empty($recordedMatchedPrefixes)):
+		case (!count($userRecordedYubiKeyOTP)):
+			if( $debugOutput ) eZLog::write("Auth denied");
                         $user = false;
 		break;
 
-		/*
-		If YubiKey OTP from profile has a different prefix as the YubiKey OTP submitted
-		then test against secondary key's prefix, if fail then auth denied
-		*/
-		case (($YubiKeyPrefix != $recordedYubiKeyPrefix) && ($YubiKeyPrefix != $recordedYubiKeyPrefix_2)):
-			eZLog::write("Auth denied");
-			$user = false;
-		break;
-
 		default:
-			eZLog::write("Looks OK!");
+			if( $debugOutput ) eZLog::write("Looks OK!");
 		break;
 	}
  

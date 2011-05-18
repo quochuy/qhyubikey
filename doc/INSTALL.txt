@@ -1,5 +1,15 @@
 UPDATE:
 =======
+1.0beta2 to 1.0:
+================
+1 - edit the "User class" and remove all your previous 'yubikey' and 'yubikey_backup' attributes
+2 - add a new attribute of type 'matrix':
+	Type=Matrix
+	Name="YubiKey Keys (once set, you CANNOT login without your YubiKey!)"
+	Description="If you have multiple keys, register each of them by recording a sample of generated code from each of them"
+	Identifier="yubikeys"
+	Not required, Not searchable, Not collection
+
 1.0beta1 to 1.0beta2:
 =====================
 1 - add a new attribute to the "User" content class:

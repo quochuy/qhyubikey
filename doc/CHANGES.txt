@@ -1,3 +1,9 @@
+1.0
+- removed datatypes as we don't need to validate the key when the user registers it in his profile
+- use the build-in matrix datatype for storing registered keys
+- unlimited number of backup keys
+
+1.0beta2
 - secondary YubiKey support
 - bug fixes
 - debug output settings
