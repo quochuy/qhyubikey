@@ -9,6 +9,9 @@ UPDATE:
 	Description="If you have multiple keys, register each of them by recording a sample of generated code from each of them"
 	Identifier="yubikeys"
 	Not required, Not searchable, Not collection
+	Columns:
+		Name:name
+		Key:key
 
 1.0beta1 to 1.0beta2:
 =====================

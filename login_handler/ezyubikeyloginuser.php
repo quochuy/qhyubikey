@@ -22,9 +22,11 @@ class eZYubiKeyLoginUser extends eZUser
 	$userContentObject = eZContentObject :: fetch( $user->attribute('contentobject_id') );
         $userDatamap = $userContentObject->dataMap();
 
-	$matrix = new eZMatrix( '' );
-	$matrix->decodeXML( $userDatamap['yubikeys']->attribute('data_text'));
-	$userRecordedYubiKeyOTPArray = $matrix->Matrix['columns']['sequential'][1]['rows'];
+	if( isset( $userDatamap['yubikeys'] )) {
+		$matrix = new eZMatrix( '' );
+		$matrix->decodeXML( $userDatamap['yubikeys']->attribute('data_text'));
+		$userRecordedYubiKeyOTPArray = $matrix->Matrix['columns']['sequential'][1]['rows'];
+	}
 
 	$userUseOTP4MultiFactor = $userDatamap['multifactor']->attribute('data_int');
 
